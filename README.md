@@ -1,4 +1,4 @@
-# OptiSim — Robot Pick-and-Place Validation Framework
+# ops1 — Robot Pick-and-Place Validation Framework
 
 A closed-loop simulation validation framework built in Unreal Engine 5 and Python,
 designed to evaluate robot arm grasp-and-place performance across data-driven test scenarios.
