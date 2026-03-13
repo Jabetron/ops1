@@ -8,7 +8,7 @@ designed to evaluate robot arm grasp-and-place performance across data-driven te
 
 ## Overview
 
-OptiSim provides a complete test automation pipeline for validating robot pick-and-place
+Ops1 provides a complete test automation pipeline for validating robot pick-and-place
 behavior in simulation. The system loads scenario configurations from JSON, executes trials
 in a physics-based UE5 environment, captures pass/fail metrics, and exports structured
 results for analysis.
