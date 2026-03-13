@@ -1,0 +1,8 @@
+{
+  "scenario_id": "SCN_005",
+  "object": "TestSphere",
+  "start_pose": {"x": -50.0, "y": 0.0, "z": 100.0},
+  "target_pose": {"x": 300.0, "y": -75.0, "z": 100.0},
+  "placement_tolerance_mm": 10.0,
+  "max_cycle_time_s": 5.0
+}

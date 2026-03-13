@@ -1,0 +1,8 @@
+{
+  "scenario_id": "SCN_001",
+  "object": "TestBox",
+  "start_pose": {"x": 0.0, "y": 0.0, "z": 100.0},
+  "target_pose": {"x": 120.0, "y": 0.0, "z": 100.0},
+  "placement_tolerance_mm": 20.0,
+  "max_cycle_time_s": 6.0
+}

@@ -1,0 +1,22 @@
+# Unreal Engine
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+Build/
+*.VC.db
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.xcworkspace
+*.xcodeproj
+
+# Visual Studio
+.vs/
+
+# Test output
+Results/
+
+# Misc
+Temp.txt
