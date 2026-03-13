@@ -3,7 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import subprocess
-import os
+import random
 from pathlib import Path
 from datetime import datetime
 
@@ -48,31 +48,66 @@ with st.sidebar:
     csv_files = sorted(RESULTS_DIR.glob("*.csv"), reverse=True) if RESULTS_DIR.exists() else []
 
     if not csv_files:
-        st.warning("No results found.\nRun test_runner.py first.")
-        st.stop()
+        st.info("No results found — showing demo data. Run test_runner.py to load real results.")
 
     selected_file = st.selectbox(
         "Result file",
-        options=csv_files,
-        format_func=lambda p: p.name,
+        options=csv_files if csv_files else ["demo"],
+        format_func=lambda p: p.name if p != "demo" else "demo_run.csv",
     )
 
 # ── Load data ─────────────────────────────────────────────────────────────────
-df = pd.read_csv(selected_file)
-df["success"] = df["success"].astype(str).str.strip().str.lower().map(
-    {"true": True, "false": False, "1": True, "0": False}
-)
+DEMO_MODE = selected_file == "demo"
 
-# Parse run timestamp from filename (run_YYYYMMDD_HHMMSS.csv)
-try:
-    ts_str = selected_file.stem.replace("run_", "")
-    run_ts = datetime.strptime(ts_str, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
-except Exception:
-    run_ts = "unknown"
+if DEMO_MODE:
+    rng = random.Random(42)
+    scenarios = {
+        "SCN_001": ("TestBox",      20.0, 6.0, 0.80),
+        "SCN_002": ("TestCylinder", 20.0, 6.0, 0.75),
+        "SCN_003": ("TestSphere",   20.0, 5.0, 0.70),
+        "SCN_004": ("TestBox",      10.0, 5.0, 0.55),
+        "SCN_005": ("TestCylinder", 10.0, 5.0, 0.50),
+        "SCN_006": ("TestSphere",   10.0, 6.0, 0.45),
+    }
+    FAILURE_TAGS = ["PLACEMENT_MISS", "GRASP_FAIL", "TIMEOUT", "DROP_IN_TRANSIT"]
+    rows = []
+    for scn_id, (obj, tol, max_t, p_pass) in scenarios.items():
+        for trial in range(1, 6):
+            success = rng.random() < p_pass
+            if success:
+                err = rng.uniform(0, tol * 0.8)
+                cyc = rng.uniform(1.5, max_t * 0.85)
+                tag = "NONE"
+            else:
+                err = rng.uniform(tol * 0.9, tol * 2.5)
+                cyc = rng.uniform(max_t * 0.7, max_t * 1.1)
+                tag = rng.choice(FAILURE_TAGS)
+            rows.append(dict(
+                scenario_id=scn_id, object=obj, trial=trial,
+                success=success, placement_error_mm=round(err, 2),
+                cycle_time_s=round(cyc, 3), failure_tag=tag,
+                placement_tolerance_mm=tol, max_cycle_time_s=max_t,
+            ))
+    df = pd.DataFrame(rows)
+    run_ts = "demo"
+else:
+    df = pd.read_csv(selected_file)
+    df["success"] = df["success"].astype(str).str.strip().str.lower().map(
+        {"true": True, "false": False, "1": True, "0": False}
+    )
+    try:
+        ts_str = selected_file.stem.replace("run_", "")
+        run_ts = datetime.strptime(ts_str, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        run_ts = "unknown"
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.title("ops1 Validation Dashboard")
-st.caption(f"**File:** {selected_file.name}   |   **Run:** {run_ts}")
+if DEMO_MODE:
+    st.caption("**File:** demo_run.csv   |   **Run:** demo")
+    st.warning("Demo mode — showing synthetic data. Run test_runner.py and reload to see real results.")
+else:
+    st.caption(f"**File:** {selected_file.name}   |   **Run:** {run_ts}")
 st.divider()
 
 # ── Section 1 — KPIs ──────────────────────────────────────────────────────────
@@ -281,5 +316,5 @@ def color_success(val):
         return "background-color: #4a1a1a; color: #e74c3c"
     return ""
 
-styled = df.style.applymap(color_success, subset=["success"])
+styled = df.style.map(color_success, subset=["success"])
 st.dataframe(styled, use_container_width=True, height=400)
