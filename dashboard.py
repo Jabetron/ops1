@@ -47,8 +47,6 @@ with st.sidebar:
     # File picker
     csv_files = sorted(RESULTS_DIR.glob("*.csv"), reverse=True) if RESULTS_DIR.exists() else []
 
-    if not csv_files:
-        st.info("No results found — showing demo data. Run test_runner.py to load real results.")
 
     selected_file = st.selectbox(
         "Result file",
@@ -105,7 +103,6 @@ else:
 st.title("ops1 Validation Dashboard")
 if DEMO_MODE:
     st.caption("**File:** demo_run.csv   |   **Run:** demo")
-    st.warning("Demo mode — showing synthetic data. Run test_runner.py and reload to see real results.")
 else:
     st.caption(f"**File:** {selected_file.name}   |   **Run:** {run_ts}")
 st.divider()
